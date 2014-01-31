@@ -1,16 +1,13 @@
 var path = require('path');
-var archive = require('../helpers/archive-helpers');
 var fs = require('fs');
-var helpers = require('./http-helpers');
 var url = require('url');
-// require more modules/folders here!
-// 'Content-Type': "text/html"
-
+var qs = require('querystring');
+var archive = require('../helpers/archive-helpers');
+var helpers = require('./http-helpers');
 
 exports.handleRequest = function (req, res) {
   var method = methods[req.method];
   method ? method(req, res) : helpers.sendResponse(res, null, 404);
-  //res.end(archive.paths.list);
 };
 
 var getFile = function(req, res) {
@@ -44,27 +41,45 @@ var getFile = function(req, res) {
 };
 
 var postUrl = function(req, res){
-  var requestedURL = '';
+  var body = '';
   req.on('data', function(data){
-    requestedURL += data;
+    body += data;
   });
   req.on('end', function(){
-    if(archive.isUrlInList(requestedURL)){
-      if(archive.isURLArchived(requestedURL)){
-        //redirect to site local file
-      } else {
-        //redirect to loading.html
-      }
+    queryObj = qs.parse(body);
+    var requestedURL = queryObj.url;
+    processPostRequestLogic(req, res, requestedURL);
+  });
+}
+
+var processPostRequestLogic = function(req, res, requestedURL) {
+  //Is the requested url in the list
+  archive.isUrlInList(requestedURL, function(found) {
+    if(found) {
+      //If the requested url archived
+      archive.isURLArchived(requestedURL, function(archived) {
+        if(archived) {
+          //Redirect to site data file
+          res.writeHead(302, {'Location': '/' + requestedURL});
+          res.end();
+        } else {
+          //Redirect to loading.html
+          res.writeHead(302, {'Location': '/loading.html'});
+          res.end();
+        }
+      });
     } else {
-      archive.addUrlToList(requestedURL);
-      //redirect to loading
+      //Add it to the list and when done, redirect to loading.html
+      archive.addUrlToList(requestedURL, function() {
+        //Redirect to loading.html
+        res.writeHead(302, {'Location': '/loading.html'});
+        res.end();
+      });
     }
   });
-  //check database for this url
-  //if exists -> reroute to get url for that file
-  //else add url to database and reroute to loading.html
+};
 
-}
+
 
 var methods = {
   'GET': getFile,
