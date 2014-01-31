@@ -1,2 +1,6 @@
 www.google.com
 www.amazon.com
+www.github.com
+www.yahoo.com
+www.hackreactor.com
+www.walmart.com

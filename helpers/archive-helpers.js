@@ -70,16 +70,20 @@ exports.isURLArchived = function(requestedURL, cb){
 };
 
 exports.downloadUrls = function(arrayOfUrls){
+  console.log('downloading... please wait');
   for (var i = 0; i < arrayOfUrls.length; i++) {
-    request(arrayOfUrls[i], function(err, response, body){
-      if(!error && response.statusCode === 200){
-        //var fromFile = fs.createReadStream(body);
+    request('http://' + arrayOfUrls[i], function(err, response, body){
+      console.log(arrayOfUrls[i]);
+      console.log(body);
+      if(!err && response.statusCode === 200){
+        var fromFile = fs.createReadStream(body);
         var newFile = fs.createWriteStream(arrayOfUrls[i]);
-        body.pipe(newFile);
+        fromFile.pipe(newFile);
       }
-    }
-  };
+    });
+  }
 };
+
 
 
 

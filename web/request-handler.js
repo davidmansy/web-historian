@@ -70,7 +70,7 @@ var processPostRequestLogic = function(req, res, requestedURL) {
       });
     } else {
       //Add it to the list and when done, redirect to loading.html
-      archive.addUrlToList(requestedURL, function() {
+        archive.addUrlToList(requestedURL, function() {
         //Redirect to loading.html
         res.writeHead(302, {'Location': '/loading.html'});
         res.end();
@@ -78,8 +78,6 @@ var processPostRequestLogic = function(req, res, requestedURL) {
     }
   });
 };
-
-
 
 var methods = {
   'GET': getFile,
